@@ -63,8 +63,16 @@ public class MainActivity extends AppCompatActivity {
         ValueEventListener mListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                User user = dataSnapshot.getValue(User.class);
-                Log.i("User", "onDataChange: " + user);
+
+                try {
+                    for (DataSnapshot userSnapshot: dataSnapshot.getChildren()) {
+                        User user = userSnapshot.getValue(User.class);
+                        Log.i("User", "onDataChange: " + user.uname+ " --- " + user.pass);
+                    }
+                } catch (Exception e) {
+                    Log.e("User", "onDataChange: ", e);
+                }
+
             }
 
             @Override
@@ -73,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        mDataBaseReference.addValueEventListener(mListener);
+        mDataBaseReference.child("user").addValueEventListener(mListener);
 
     }
 
@@ -82,24 +90,5 @@ public class MainActivity extends AppCompatActivity {
         mDataBaseReference.child("user").child(name).setValue(user);
     }
 
-    //Class also must be public
-    @IgnoreExtraProperties
-    public class User {
-
-        // objects must be public
-        public String uname, pass;
-
-        public User() {
-
-        }
-
-        public User(String uname, String pass) {
-            this.uname = uname;
-            this.pass = pass;
-        }
-
-
-
-    }
 
 }
