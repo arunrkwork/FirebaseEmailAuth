@@ -1,11 +1,21 @@
 package apps.arunrk.firebasedb;
 
+import android.support.annotation.NonNull;
+import android.text.TextUtils;
+import android.util.Log;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.Button;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.FirebaseAuth;
+
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.Toast;
 
 public class SignInActivity extends AppCompatActivity {
 
@@ -19,8 +29,8 @@ public class SignInActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-            FirebaseUser currentUser = mAuth.getCurrentUser();
-            updateUI(currentUser);
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        updateUI(currentUser);
     }
 
 
@@ -35,16 +45,16 @@ public class SignInActivity extends AppCompatActivity {
         edUname = findViewById(R.id.edUname);
         edPass = findViewById(R.id.edPass);
 
-          btnLogin.setOnClickListener(new android.view.View.OnClickListener() {
+        btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(android.view.View view) {
+            public void onClick(View view) {
                 createAccount();
             }
         });
 
-          btnReg.setOnClickListener(new android.view.View.OnClickListener() {
+        btnReg.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(android.view.View view) {
+            public void onClick(View view) {
                 startActivity(new android.content.Intent(SignInActivity.this, SignUpActivity.class));
             }
         });
@@ -57,41 +67,48 @@ public class SignInActivity extends AppCompatActivity {
         String pass = edPass.getText().toString().trim();
 
 
-       if(!validate()) return;
+        if (!validate()) return;
 
-        mAuth.signInWithEmailAndPassword(email, pass)
-                .addOnCompleteListener(this, new com.google.android.gms.tasks.OnCompleteListener<com.google.firebase.auth.AuthResult>() {
-                    @Override
-                    public void onComplete(@android.support.annotation.NonNull com.google.android.gms.tasks.Task<com.google.firebase.auth.AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            android.util.Log.d(TAG, "signInWithEmail:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            updateUI(user);
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            android.util.Log.w(TAG, "signInWithEmail:failure", task.getException());
-                            android.widget.Toast.makeText(SignInActivity.this, "Authentication failed.",
-                                    android.widget.Toast.LENGTH_SHORT).show();
-                            updateUI(null);
-                        }
+        mAuth.signInWithEmailAndPassword(email, pass).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if (task.isSuccessful()) {
+                    // Sign in success, update UI with the signed-in user's information
+                    android.util.Log.d(TAG, "signInWithEmail:success");
+                    FirebaseUser user = mAuth.getCurrentUser();
+                    updateUI(user);
+                } else {
+                    // If sign in fails, display a message to the user.
+                    Log.w(TAG, "signInWithEmail:failure", task.getException());
+                    android.widget.Toast.makeText(SignInActivity.this, "Authentication failed.", android.widget.Toast.LENGTH_SHORT).show();
+                    updateUI(null);
+                }
 
 
-                        if (!task.isSuccessful()) {
-                            android.widget.Toast.makeText(SignInActivity.this, "Unsuccess", android.widget.Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+                if (!task.isSuccessful()) {
+                    Toast.makeText(SignInActivity.this, "Unsuccess", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
     }
 
     public void updateUI(FirebaseUser currentUser) {
 
-        if(currentUser != null) {
+        if (currentUser != null) {
+            final FirebaseUser user = mAuth.getCurrentUser();
+            user.sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful()) {
+                        Log.d(TAG, "Email sent.");
+                    }
+                }
+            });
             finish();
             startActivity(new android.content.Intent(SignInActivity.this, MainActivity.class));
         } else {
-            android.widget.Toast.makeText(SignInActivity.this, "Sign In Not Allowed", android.widget.Toast.LENGTH_SHORT).show();
+            Toast.makeText(SignInActivity.this, "Sign In Not Allowed", Toast.LENGTH_SHORT).show();
         }
 
     }
@@ -102,14 +119,14 @@ public class SignInActivity extends AppCompatActivity {
         String email = edUname.getText().toString().trim();
         String pass = edPass.getText().toString().trim();
 
-        if(android.text.TextUtils.isEmpty(email)) {
+        if (TextUtils.isEmpty(email)) {
             edUname.setError("Required");
             validation = false;
         } else {
             edUname.setError(null);
         }
 
-        if(android.text.TextUtils.isEmpty(pass)) {
+        if (TextUtils.isEmpty(pass)) {
             edPass.setError("Required");
             validation = false;
         } else {

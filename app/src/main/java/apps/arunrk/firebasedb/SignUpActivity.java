@@ -1,15 +1,23 @@
 package apps.arunrk.firebasedb;
 
+import android.support.annotation.NonNull;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.Button;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.FirebaseAuth;
+
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.Toast;
 
 public class SignUpActivity extends AppCompatActivity {
 
-   private static final String TAG = SignUpActivity.class.getSimpleName();
+    private static final String TAG = SignUpActivity.class.getSimpleName();
 
     private FirebaseAuth mAuth;
     private EditText edUname, edPass;
@@ -19,8 +27,8 @@ public class SignUpActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-            FirebaseUser currentUser = mAuth.getCurrentUser();
-            updateUI(currentUser);
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        updateUI(currentUser);
     }
 
 
@@ -34,9 +42,9 @@ public class SignUpActivity extends AppCompatActivity {
         edUname = findViewById(R.id.edUname);
         edPass = findViewById(R.id.edPass);
 
-          btnSignUp.setOnClickListener(new android.view.View.OnClickListener() {
+        btnSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(android.view.View view) {
+            public void onClick(View view) {
                 createAccount();
             }
         });
@@ -49,12 +57,11 @@ public class SignUpActivity extends AppCompatActivity {
         String pass = edPass.getText().toString().trim();
 
 
-       if(!validate()) return;
+        if (!validate()) return;
 
-       mAuth.createUserWithEmailAndPassword(email, pass)
-         .addOnCompleteListener(this, new com.google.android.gms.tasks.OnCompleteListener<com.google.firebase.auth.AuthResult>() {
+        mAuth.createUserWithEmailAndPassword(email, pass).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
-            public void onComplete(@android.support.annotation.NonNull com.google.android.gms.tasks.Task<com.google.firebase.auth.AuthResult> task) {
+            public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
                     // Sign in success, update UI with the signed-in user's information
                     android.util.Log.d(TAG, "createUserWithEmail:success");
@@ -63,8 +70,7 @@ public class SignUpActivity extends AppCompatActivity {
                 } else {
                     // If sign in fails, display a message to the user.
                     android.util.Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                    android.widget.Toast.makeText(SignUpActivity.this, "Authentication failed.",
-                            android.widget.Toast.LENGTH_SHORT).show();
+                    android.widget.Toast.makeText(SignUpActivity.this, "Authentication failed.", android.widget.Toast.LENGTH_SHORT).show();
                     updateUI(null);
                 }
 
@@ -75,10 +81,11 @@ public class SignUpActivity extends AppCompatActivity {
 
     public void updateUI(FirebaseUser currentUser) {
 
-        if(currentUser != null) {
+        if (currentUser != null) {
             finish();
-        } else {android.widget.Toast.makeText(SignUpActivity.this, "User Acctount Not Created", android.widget.Toast.LENGTH_SHORT).show();
-}
+        } else {
+            Toast.makeText(SignUpActivity.this, "User Account Not Created", Toast.LENGTH_SHORT).show();
+        }
 
 
     }
@@ -89,14 +96,14 @@ public class SignUpActivity extends AppCompatActivity {
         String email = edUname.getText().toString().trim();
         String pass = edPass.getText().toString().trim();
 
-        if(android.text.TextUtils.isEmpty(email)) {
+        if (android.text.TextUtils.isEmpty(email)) {
             edUname.setError("Required");
             validation = false;
         } else {
             edUname.setError(null);
         }
 
-        if(android.text.TextUtils.isEmpty(pass)) {
+        if (android.text.TextUtils.isEmpty(pass)) {
             edPass.setError("Required");
             validation = false;
         } else {
